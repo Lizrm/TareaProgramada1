@@ -118,6 +118,10 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
 		
 		for(int i = 0; i < n; ++i)
 		{
+            printf("Resultado de multipicar la Matriz por un Vector: %d\n",Q[i]);
+		}
+		for(int i = 0; i < n; ++i)
+		{
             for(int j=0, j<n,j++)
             {
                 M[i][j]=rand() % 10;
