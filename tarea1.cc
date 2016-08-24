@@ -150,6 +150,15 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
  * 
  * int q; // elemento del vector Q
  * 
- * q += M[i][j]*P[i]; // esto tengo que repensarlo
+ * for(int i = 0; i < n; ++i ) //(i,j)esto es lo que hay q cambiar porque no se sabe como se reparte
+ * {    
+ *      q = 0;
+ *      for(int j = 0; j < n; ++j )
+ *      {
+            q += M[i][j]*P[j];
+        }
+     
+        Q[i] = q;
+    }
  * 
  * 
