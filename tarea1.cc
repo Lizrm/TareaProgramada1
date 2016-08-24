@@ -56,7 +56,7 @@ int main(int argc,char **argv)
          for(int i=0, i<n,i++)
          {
             V[i]=rand() % 10;
-            P[i] = 0;           // inicializo el vector de primos en 0
+            P[i] = 0;           // inicializacon del vector de primos en 0
             
             for(int j=0, j<n,j++)
             {
@@ -147,5 +147,9 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
  * {    
      p[filaActual]++; 
  * }
+ * 
+ * int q; // elemento del vector Q
+ * 
+ * q += M[i][j]*P[i]; // esto tengo que repensarlo
  * 
  * 
