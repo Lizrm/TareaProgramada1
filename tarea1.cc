@@ -13,20 +13,13 @@ int main(int argc,char **argv)
        tp -> cantidad total de primos*/
     int n = 0, myid, numprocs, tp = 0;
     int P[n]; /*Vector P para contar los primos por filas */
-   
-    for(int i = 0; i <n; ++i) //inicializo el vector en 0, no se si es necesario o no
-    {
-        P[n] = 0;
-    }
-    
-    
-    
-    
     int M [n][n]; /*Creacion de la matriz M */
     int V [n]; /*Creacion de la matriz V */
     int B [n][n]; /*Creacion de la matriz B */
-    /* startwtime hora inicial
-       endwtime hora final*/
+    
+    int Q [n]; /*Creacion del vector Q, resultado de multiplicar M*V */
+    
+    /* startwtime hora inicial endwtime hora final*/
     double startwtime, endwtime;
 
     MPI_Init(&argc,&argv);
@@ -43,29 +36,36 @@ int main(int argc,char **argv)
     Comentada porque se usa para haccer pruebas */
 
 	MPI_Barrier(MPI_COMM_WORLD); /* Barrera de sincronizacion. Hasta que todos los procesos lleguen aqui se puede seguir*/
-        if (myid == 0)
-        {
-         while (!n)//HACER LA COMPROBACION DE QUE SEA MULTIPLO DE LA CANTIDAD DE PROCESOS
-		{
-		 printf("Digite el tamanno de la matriz M y vector V (Debe ser mutiplo de la cantidad de procesos)");
-		 fflush(stdout);
-         scanf("%d",&n);
-		}
-		/*Acá se realizan todas las tareas que le corresponden al proceso raíz*/
+    if (myid == 0)
+    {
+        bool multiplo = false;
         
-         
+        while (!multiplo)
+	    {
+    		 printf("Digite el tamanno de la matriz M y vector V (Debe ser mutiplo de la cantidad de procesos) \n");
+    		 fflush(stdout);
+             scanf("%d",&n);
+             
+             if((n>numorocs) && (n%numorocs == 0)) //se comprueba que n sean multiplo de los procesos
+             {
+                multiplo = true;                 
+             }
+	    }
+	    /*Acá se realizan todas las tareas que le corresponden al proceso raíz*/
          /*Generacion aleatoria de los elementos de la matriz M y vector V*/
          for(int i=0, i<n,i++)
          {
             V[i]=rand() % 10;
+            P[i] = 0;           // inicializo el vector de primos en 0
+            
             for(int j=0, j<n,j++)
             {
                 M[i][j]=rand() % 10;
             }
          }
-         
-	    startwtime = MPI_Wtime(); //Toma del tiempo inicial para saber cuanto se tarda en resolved los problemas
-        }
+     
+        startwtime = MPI_Wtime(); //Toma del tiempo inicial para saber cuanto se tarda en resolved los problemas
+    }
 
         //ACÁ SE DEBE DE HACER LA REPARTICION DE LOS DATOS
         MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -97,8 +97,8 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
     . y a que le almacene esta suma en la variable pi   */ 
 
 
-        if (myid == 0) /* lo que sigue entre llaves solo lo hace el proceso 0 */
-	    {
+    if (myid == 0) /* lo que sigue entre llaves solo lo hace el proceso 0 */
+    {
         
         for(int i = 0; i < n; ++i)
 		{
@@ -113,24 +113,21 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
 		{
             printf("Primos de la fila %d: %d\n",i,P[i]);
 		}
-		printf("Total de Primos en la Matriz: %d\n", tp);
-
 		
-		for
+		printf("Total de Primos en la Matriz: %d\n", tp);
+		
+		for(int i = 0; i < n; ++i)
 		{
-            printf("Primos por fila: %d \n",P[i]);
-
             for(int j=0, j<n,j++)
             {
-             M[i][j]=rand() % 10;
+                M[i][j]=rand() % 10;
             }
          }
 		
 		
-		printf("Adriana Mora Calvo B24385\n Lisbeth Rojas Montero B15745"); //Agregue su apeliido y nombre que falta porfa
-			       
+		printf("Adriana Mora Calvo B24385\n Lisbeth Rojas Montero B15745");
 		fflush( stdout );
-	    }
+	}
            
     MPI_Finalize();
     return 0;
@@ -139,8 +136,9 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
 /**     LO QUE LE CORRESPONDE A CADA PROCESO
  
  * Calcular primos, ya que son numeros entre 0-9, serian los numeros: 2-3-5-7
- * 
+ *
  * int evaluado;
+ * 
  * if(evaluado == 2 || evaluado == 3|| evaluado == 5 || evaluado == 7)
  * {    
      p[filaActual]++; 
