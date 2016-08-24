@@ -13,6 +13,15 @@ int main(int argc,char **argv)
        tp -> cantidad total de primos*/
     int n = 0, myid, numprocs, tp = 0;
     int P[n]; /*Vector P para contar los primos por filas */
+   
+    for(int i = 0; i <n; ++i) //inicializo el vector en 0, no se si es necesario o no
+    {
+        P[n] = 0;
+    }
+    
+    
+    
+    
     int M [n][n]; /*Creacion de la matriz M */
     int V [n]; /*Creacion de la matriz V */
     int B [n][n]; /*Creacion de la matriz B */
@@ -46,10 +55,12 @@ int main(int argc,char **argv)
         
          
          /*Generacion aleatoria de los elementos de la matriz M y vector V*/
-         for(int i=0, i<n,i++){
-             V[i]=rand() % 10;
-            for(int j=0, j<n,j++){
-            M[i][j]=rand() % 10;
+         for(int i=0, i<n,i++)
+         {
+            V[i]=rand() % 10;
+            for(int j=0, j<n,j++)
+            {
+                M[i][j]=rand() % 10;
             }
          }
          
@@ -86,27 +97,53 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
     . y a que le almacene esta suma en la variable pi   */ 
 
 
-            if (myid == 0) 
-/* lo que sigue entre llaves solo lo hace el proceso 0 */
+        if (myid == 0) /* lo que sigue entre llaves solo lo hace el proceso 0 */
 	    {
+        
+        for(int i = 0; i < n; ++i)
+		{
+            tp += P[i];
+		}
+        
                
 		endwtime = MPI_Wtime(); /* Se toma el tiempo actual, para luego calcular la duración del cálculo por 
 		                        diferencia con el tiempo inicial*/
 		printf("Tiempo = %f\n", endwtime-startwtime);
-		/*Impresion de los resultados*/
-		/*Impresion de la Matriz B*/
-		for(int i=0, i<n,i++){
-             V[i]=rand() % 10;
-            for(int j=0, j<n,j++){
-            M[i][j]=rand() % 10;
+		for(int i = 0; i < n; ++i)
+		{
+            printf("Primos de la fila %d: %d\n",i,P[i]);
+		}
+		printf("Total de Primos en la Matriz: %d\n", tp);
+
+		
+		for
+		{
+            printf("Primos por fila: %d \n",P[i]);
+
+            for(int j=0, j<n,j++)
+            {
+             M[i][j]=rand() % 10;
             }
          }
 		
-		printf("pi es aproximadamente %.16f, El error de la aproximacion es %.16f\n", pi, fabs(pi - PI25DT));
-		printf("Adriana Mora Calvo B24385\n Lisbeth Rojas"); //Agregue su apeliido y nombre que falta porfa
+		
+		printf("Adriana Mora Calvo B24385\n Lisbeth Rojas Montero B15745"); //Agregue su apeliido y nombre que falta porfa
 			       
 		fflush( stdout );
 	    }
            
     MPI_Finalize();
     return 0;
+
+
+/**     LO QUE LE CORRESPONDE A CADA PROCESO
+ 
+ * Calcular primos, ya que son numeros entre 0-9, serian los numeros: 2-3-5-7
+ * 
+ * int evaluado;
+ * if(evaluado == 2 || evaluado == 3|| evaluado == 5 || evaluado == 7)
+ * {    
+     p[filaActual]++; 
+ * }
+ * 
+ * 
