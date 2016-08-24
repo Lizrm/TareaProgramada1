@@ -72,21 +72,76 @@ int main(int argc,char **argv)
 /* Esta rutina funciona para el proceso raíz (en este caso el proceso 0) realmente como un broadcast, es decir le envía a 
 TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) funciona como un me espero a recibir n */  
 
-            h   = 1.0 / (double) n;
-            sum = 0.0;
-            for (i = myid + 1; i <= n; i += numprocs) /*  se comienza con i señalando  al rectángulo cuyo num coincide con "proceso + 1"  
-			                                           y se va corriendo  "numprocs" rectángulos para el siguiente */
-            {
-                x = h * ((double)i - 0.5);            /* se encuentra x, el cual es el punto medio del rectángulo cuyo num es  "proceso" 
-				                                         (es decir i - 1). Como cada rectángulo tiene de ancho h, 
-				                                          la base de este rectángulo va desde el valor  (i-1)*h  hasta i*h,
-														  por lo tanto el punto medio de la base es (i-1)* h + h/2  = h(i -1/2)*/ 
-				                                          
-                sum += f(x);                          /*  sa calcula f del punto medio y se acumula */
-            }
-            mypi = h * sum;                            /* resultado local para cada proceso:  ahora sí multiplica por h para obtener áreas
-			                                               de rectángulos, pero a todos de una vez ya sumadas su longitudes del alto: f(x )*/
+//****     LO QUE LE CORRESPONDE A CADA PROCESO***//
 
+
+// Calcular primos, ya que son numeros entre 0-9, serian los numeros: 2-3-5-7
+   int evaluado;
+  
+  if(evaluado == 2 || evaluado == 3|| evaluado == 5 || evaluado == 7)
+  {    
+     p[filaActual]++; 
+  }
+
+ 
+ 
+ //Multiplicacion de Matriz por vector
+  int q; //resultado parcial
+  
+  for(int i = 0; i < n; ++i ) //(i,j)esto es lo que hay q cambiar porque no se sabe como se reparte
+  {    
+       q = 0;
+       for(int j = 0; j < n; ++j )
+       {
+            q += M[i][j]*P[j];
+        }
+     
+        Q[i] = q;
+    }
+  
+ //Oceano  se deben modificar los i,j por lo que correpsondan asi como la M y l B
+ switch(myid)   
+ {
+    case 0: //quien tenga la fila 0
+    
+        switch(columna)
+        {
+            case 0:     B[i,j] = M[i,j] + M[i,j+1] + M[i+1,j]
+            break;
+            
+            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i+1,j]
+            break;
+            
+            default:    B[i,j] = M[i,j] + M[i,j -1] + M[i,j+1] + M[i+1,j]
+        }    
+    break;
+    
+    case n-1: //quien tenga la ultima fila
+        switch(columna)
+        {
+            case 0:     B[i,j] = M[i,j] + M[i -1,j] + M[i,j+1]
+            break;
+            
+            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j]
+            break;
+            
+        }    
+    break;
+    
+    default: 
+        switch(columna)
+        {
+            case 0:     B[i,j] = M[i,j] + M[i -1,j] + M[i,j+1] + M[i+1,j];
+            break;
+            
+            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j] + M[i+1,j]
+                
+            break;
+            
+            default:    B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j] + M[i,j+1] + M[i+1,j]
+        }    
+ }
+  
         //ACA SE DEBE DE RECIBIR LOS DATOS DE TODOS LOS PROCESOS
           MPI_Reduce(&mypi, &pi, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 /* Esta rutina funciona así:
@@ -100,7 +155,7 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
     if (myid == 0) /* lo que sigue entre llaves solo lo hace el proceso 0 */
     {
         
-        for(int i = 0; i < n; ++i)
+        for(int i = 0; i < n; ++i)  //Suma los primos en total de la matriz
 		{
             tp += P[i];
 		}
@@ -136,74 +191,3 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
     MPI_Finalize();
     return 0;
 
-
-/**     LO QUE LE CORRESPONDE A CADA PROCESO
- 
- * Calcular primos, ya que son numeros entre 0-9, serian los numeros: 2-3-5-7
- *
- * int evaluado;
- * 
- * if(evaluado == 2 || evaluado == 3|| evaluado == 5 || evaluado == 7)
- * {    
-     p[filaActual]++; 
- * }
- * 
- * int q; // elemento del vector Q
- * 
- * for(int i = 0; i < n; ++i ) //(i,j)esto es lo que hay q cambiar porque no se sabe como se reparte
- * {    
- *      q = 0;
- *      for(int j = 0; j < n; ++j )
- *      {
-            q += M[i][j]*P[j];
-        }
-     
-        Q[i] = q;
-    }
- **/ 
- 
- 
- //Oceano  se deben modificar los i,j por lo que correpsondan asi como la M y l B
- switch(myid)   
- {
-    case 0:
-    
-        switch(columna)
-        {
-            case 0:     B[i,j] = M[i,j] + M[i,j+1] + M[i+1,j]
-            break;
-            
-            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i+1,j]
-            break;
-            
-            default:    B[i,j] = M[i,j] + M[i,j -1] + M[i,j+1] + M[i+1,j]
-        }    
-    break;
-    
-    case n-1: 
-        switch(columna)
-        {
-            case 0:     B[i,j] = M[i,j] + M[i -1,j] + M[i,j+1]
-            break;
-            
-            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j]
-            break;
-            
-        }    
-    break;
-    
-    default: 
-        switch(columna)
-        {
-            case 0:     B[i,j] = M[i,j] + M[i -1,j] + M[i,j+1] + M[i+1,j];
-            break;
-            
-            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j] + M[i+1,j]
-                
-            break;
-            
-            default:    B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j] + M[i,j+1] + M[i+1,j]
-        }    
-
- }
-  
