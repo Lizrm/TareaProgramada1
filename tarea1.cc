@@ -160,5 +160,50 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
      
         Q[i] = q;
     }
- * 
- * 
+ **/ 
+ 
+ 
+ //Oceano  se deben modificar los i,j por lo que correpsondan asi como la M y l B
+ switch(myid)   
+ {
+    case 0:
+    
+        switch(columna)
+        {
+            case 0:     B[i,j] = M[i,j] + M[i,j+1] + M[i+1,j]
+            break;
+            
+            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i+1,j]
+            break;
+            
+            default:    B[i,j] = M[i,j] + M[i,j -1] + M[i,j+1] + M[i+1,j]
+        }    
+    break;
+    
+    case n-1: 
+        switch(columna)
+        {
+            case 0:     B[i,j] = M[i,j] + M[i -1,j] + M[i,j+1]
+            break;
+            
+            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j]
+            break;
+            
+        }    
+    break;
+    
+    default: 
+        switch(columna)
+        {
+            case 0:     B[i,j] = M[i,j] + M[i -1,j] + M[i,j+1] + M[i+1,j];
+            break;
+            
+            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j] + M[i+1,j]
+                
+            break;
+            
+            default:    B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j] + M[i,j+1] + M[i+1,j]
+        }    
+
+ }
+  
