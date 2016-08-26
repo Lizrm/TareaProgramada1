@@ -7,6 +7,7 @@
 
 int main(int argc,char **argv)
 {
+    startwtimet = MPI_Wtime(); //Toma del tiempo inicial para saber cuanto se tarda en total
     /* n -> cantidad de procesos 
        myid -> identificador de cada proceso
        numorocs -> cantidad de procesos
@@ -23,8 +24,10 @@ int main(int argc,char **argv)
     int total;  //Para guardar la multiplicacion de n*n
     int evaluado, posicion;
     
-    /* startwtime hora inicial endwtime hora final*/
+    /* startwtime hora inicial de calculos endwtime hora final de calculos*/
+     /* startwtime hora inicial endwtime hora final total*/
     double startwtime, endwtime;
+    double startwtimet, endwtimet;
 
     MPI_Init(&argc,&argv);
 /*  Se inicia el trabajo con MPI */
@@ -181,14 +184,15 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
     . todos los procesos envíen su resultado final, 
     . a que con ellos el MPI haga una suma (porque se especificó la función MPI_SUM) 
     . y a que le almacene esta suma en la variable pi   */ 
-
+    
+    endwtime = MPI_Wtime(); /* Se toma el tiempo actual, para luego calcular la duración del cálculo por 
+		                        diferencia con el tiempo inicial*/
+		
 
     if (myid == 0) /* lo que sigue entre llaves solo lo hace el proceso 0 */
     {
         
-        endwtime = MPI_Wtime(); /* Se toma el tiempo actual, para luego calcular la duración del cálculo por 
-		                        diferencia con el tiempo inicial*/
-		printf("Tiempo = %f\n", endwtime-startwtime);
+        printf("Tiempo = %f\n", endwtime-startwtime);
 		for(int i = 0; i < n; ++i)
 		{
             printf("Primos de la fila %d: %d\n",i,P[i]);
@@ -215,7 +219,8 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
            
          }
         
-		
+		endwtimet = MPI_Wtime(); /* Se toma el tiempo actual, para luego calcular la duración del tiempo total*/
+		printf("Tiempo = %f\n", endwtimet-startwtimet);
 		printf("Adriana Mora Calvo B24385\n Lisbeth Rojas Montero B15745");
 		fflush( stdout );
 	}
