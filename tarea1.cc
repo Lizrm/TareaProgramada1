@@ -1,5 +1,5 @@
 //Tarea Programada 1
-#include <mpi.h>
+//#include "mpi.h"
 #include <stdio.h>
 #include <math.h>
 
@@ -11,13 +11,13 @@ int main(int argc,char **argv)
        myid -> identificador de cada proceso
        numorocs -> cantidad de procesos
        tp -> cantidad total de primos*/
-    int n = 0, myid, numprocs, tp = 0;
-    int P[n]; /*Vector P para contar los primos por filas */
-    int M [n][n]; /*Creacion de la matriz M */
-    int V [n]; /*Creacion de la matriz V */
-    int B [n][n]; /*Creacion de la matriz B */
+    int n, myid, numprocs, tp;
+    int *P; /*Vector P para contar los primos por filas */
+    int *M; /*Creacion de la matriz M */
+    int *V; /*Creacion de la matriz V */
+    int *B; /*Creacion de la matriz B */
     
-    int Q [n]; /*Creacion del vector Q, resultado de multiplicar M*V */
+    int *Q; /*Creacion del vector Q, resultado de multiplicar M*V */
     
     /* startwtime hora inicial endwtime hora final*/
     double startwtime, endwtime;
@@ -46,19 +46,30 @@ int main(int argc,char **argv)
     		 fflush(stdout);
              scanf("%d",&n);
              
-             if((n>numorocs) && (n%numorocs == 0)) //se comprueba que n sean multiplo de los procesos
+             if((n>numprocs) && (n%numprocs == 0)) //se comprueba que n sean multiplo de los procesos
              {
                 multiplo = true;                 
              }
 	    }
+	    
+	    /*Se inicializan las variables*/
+	    
+	    B = new int[n*n];
+	    M = new int[n*n];
+	    
+	    V = new int[n];
+	    P = new int[n];
+	    V = new int[n];
+	    Q = new int[n];
+	    
 	    /*Acá se realizan todas las tareas que le corresponden al proceso raíz*/
          /*Generacion aleatoria de los elementos de la matriz M y vector V*/
-         for(int i=0, i<n,i++)
+         for(int i=0; i<n; i++)
          {
             V[i]=rand() % 10;
             P[i] = 0;           // inicializacon del vector de primos en 0
             
-            for(int j=0, j<n,j++)
+            for(int j=0; j<n; j++)
             {
                 M[i][j]=rand() % 10;
             }
@@ -80,7 +91,7 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
   
   if(evaluado == 2 || evaluado == 3|| evaluado == 5 || evaluado == 7)
   {    
-     p[filaActual]++; 
+     p[columnaActual]++; 
   }
 
  
@@ -106,23 +117,23 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
     
         switch(columna)
         {
-            case 0:     B[i,j] = M[i,j] + M[i,j+1] + M[i+1,j]
+            case 0:     B[i,j] = M[i,j] + M[i,j+1] + M[i+1,j];
             break;
             
-            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i+1,j]
+            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i+1,j];
             break;
             
-            default:    B[i,j] = M[i,j] + M[i,j -1] + M[i,j+1] + M[i+1,j]
+            default:    B[i,j] = M[i,j] + M[i,j -1] + M[i,j+1] + M[i+1,j];
         }    
     break;
     
     case n-1: //quien tenga la ultima fila
         switch(columna)
         {
-            case 0:     B[i,j] = M[i,j] + M[i -1,j] + M[i,j+1]
+            case 0:     B[i,j] = M[i,j] + M[i -1,j] + M[i,j+1];
             break;
             
-            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j]
+            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j];
             break;
             
         }    
@@ -134,11 +145,11 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
             case 0:     B[i,j] = M[i,j] + M[i -1,j] + M[i,j+1] + M[i+1,j];
             break;
             
-            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j] + M[i+1,j]
+            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j] + M[i+1,j];
                 
             break;
             
-            default:    B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j] + M[i,j+1] + M[i+1,j]
+            default:    B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j] + M[i,j+1] + M[i+1,j];
         }    
  }
   
@@ -155,13 +166,7 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
     if (myid == 0) /* lo que sigue entre llaves solo lo hace el proceso 0 */
     {
         
-        for(int i = 0; i < n; ++i)  //Suma los primos en total de la matriz
-		{
-            tp += P[i];
-		}
-        
-               
-		endwtime = MPI_Wtime(); /* Se toma el tiempo actual, para luego calcular la duración del cálculo por 
+        endwtime = MPI_Wtime(); /* Se toma el tiempo actual, para luego calcular la duración del cálculo por 
 		                        diferencia con el tiempo inicial*/
 		printf("Tiempo = %f\n", endwtime-startwtime);
 		for(int i = 0; i < n; ++i)
@@ -175,14 +180,21 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
 		{
             printf("Resultado de multipicar la Matriz por un Vector: %d\n",Q[i]);
 		}
-		for(int i = 0; i < n; ++i)
-		{
-            for(int j=0, j<n,j++)
-            {
-                M[i][j]=rand() % 10;
-            }
-         }
 		
+		printf("Matriz B:\n",Q[i]);
+		
+		int total = n*n;
+		for(int i = 0; i < total; ++i)
+		{
+            printf("%d", B[i]);
+            
+            if(i%(n-1) == 0)
+            {
+                printf("\n");                
+            }
+           
+         }
+        
 		
 		printf("Adriana Mora Calvo B24385\n Lisbeth Rojas Montero B15745");
 		fflush( stdout );
