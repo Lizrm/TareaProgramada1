@@ -18,6 +18,10 @@ int main(int argc,char **argv)
     int *B; /*Creacion de la matriz B */
     
     int *Q; /*Creacion del vector Q, resultado de multiplicar M*V */
+    int *bufferFilas, *bufferVector;   //bufer para recibir los elementos que le corresponden a cada proceso
+    int filasCero, filas;   //filasCero: elementos que el tocan a cero  al proceso n-1. //filas: elementos que le tocan a los demas procesos
+    int total;  //Para guardar la multiplicacion de n*n
+    int evaluado, posicion;
     
     /* startwtime hora inicial endwtime hora final*/
     double startwtime, endwtime;
@@ -54,12 +58,12 @@ int main(int argc,char **argv)
 	    
 	    /*Se inicializan las variables*/
 	    
-	    B = new int[n*n];
-	    M = new int[n*n];
+	    total = n*n;
+	    B = new int[total];
+	    M = new int[total];
 	    
 	    V = new int[n];
 	    P = new int[n];
-	    V = new int[n];
 	    Q = new int[n];
 	    
 	    /*Acá se realizan todas las tareas que le corresponden al proceso raíz*/
@@ -68,15 +72,29 @@ int main(int argc,char **argv)
          {
             V[i]=rand() % 10;
             P[i] = 0;           // inicializacon del vector de primos en 0
-            
-            for(int j=0; j<n; j++)
-            {
-                M[i][j]=rand() % 10;
-            }
+            Q[i] = 0; 
          }
      
+        for(int i=0; i<total; ++i)
+        {
+             M[i]=rand() % 10;
+        }
+        
+        
         startwtime = MPI_Wtime(); //Toma del tiempo inicial para saber cuanto se tarda en resolved los problemas
+        
+        /**Calculo las filas que le tocan a cada proceso, esto me da la cantidad de enteros del vector para cada proceso**/
+        
+        filasCero  = total/numprocs;
+        filas  = filasCero + (2*n);
+        bufer = new int [filas];
+        
     }
+    
+    
+    
+    
+    
 
         //ACÁ SE DEBE DE HACER LA REPARTICION DE LOS DATOS
         MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -87,71 +105,73 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
 
 
 // Calcular primos, ya que son numeros entre 0-9, serian los numeros: 2-3-5-7
-   int evaluado;
-  
-  if(evaluado == 2 || evaluado == 3|| evaluado == 5 || evaluado == 7)
-  {    
-     p[columnaActual]++; 
-  }
+    
+    //Multiplicacion de Matriz por vector
 
- 
- 
- //Multiplicacion de Matriz por vector
-  int q; //resultado parcial
-  
-  for(int i = 0; i < n; ++i ) //(i,j)esto es lo que hay q cambiar porque no se sabe como se reparte
-  {    
-       q = 0;
-       for(int j = 0; j < n; ++j )
-       {
-            q += M[i][j]*P[j];
-        }
-     
-        Q[i] = q;
-    }
-  
- //Oceano  se deben modificar los i,j por lo que correpsondan asi como la M y l B
- switch(myid)   
- {
-    case 0: //quien tenga la fila 0
-    
-        switch(columna)
-        {
-            case 0:     B[i,j] = M[i,j] + M[i,j+1] + M[i+1,j];
-            break;
-            
-            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i+1,j];
-            break;
-            
-            default:    B[i,j] = M[i,j] + M[i,j -1] + M[i,j+1] + M[i+1,j];
-        }    
-    break;
-    
-    case n-1: //quien tenga la ultima fila
-        switch(columna)
-        {
-            case 0:     B[i,j] = M[i,j] + M[i -1,j] + M[i,j+1];
-            break;
-            
-            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j];
-            break;
-            
-        }    
-    break;
-    
-    default: 
-        switch(columna)
-        {
-            case 0:     B[i,j] = M[i,j] + M[i -1,j] + M[i,j+1] + M[i+1,j];
-            break;
-            
-            case n-1:   B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j] + M[i+1,j];
+    int columna;
+        
+        
+         
+     switch(myid)   
+     {
+        case 0: //quien tenga la fila 0
+        
+            for(posicion = 0; posicion < filasCero; ++posicion)
+            {
+                evaluado  = bufferFilas[posicion];
+                columna = posicion %n;
+                  
+                if(evaluado == 2 || evaluado == 3|| evaluado == 5 || evaluado == 7)
+                {    
+                     p[columna]++; 
+                }
                 
-            break;
-            
-            default:    B[i,j] = M[i,j] + M[i,j -1] + M[i -1,j] + M[i,j+1] + M[i+1,j];
-        }    
- }
+                Q[columna] += evaluado*V[columna];
+                
+                B[posicion] = evaluado + M[i,j+1] + M[i+1,j];
+             }
+        break;
+                    
+                
+        
+        case n-1: //quien tenga la ultima fila
+        
+            for(posicion = n; posicion < filasCero; ++posicion)
+            {
+                evaluado  = bufferFilas[posicion];
+                columna = posicion %n;
+                  
+                if(evaluado == 2 || evaluado == 3|| evaluado == 5 || evaluado == 7)
+                {    
+                     p[columna]++; 
+                }
+                
+                Q[columna] += evaluado*V[columna];
+                
+                B[posicion] = evaluado + M[i,j -1] + M[i -1,j];
+            }
+        break;
+        
+        default: 
+            for(posicion = n; posicion < filasCero; ++posicion)
+            {
+                evaluado  = bufferFilas[posicion];
+                columna = posicion %n;
+                  
+                if(evaluado == 2 || evaluado == 3|| evaluado == 5 || evaluado == 7)
+                {    
+                     p[columna]++; 
+                }
+                
+                Q[columna] += evaluado*V[columna];
+                
+                B[posicion] = evaluado + M[i,j -1] + M[i -1,j] + M[i,j+1] + M[i+1,j];
+                
+            }
+    }
+          
+       
+ 
   
         //ACA SE DEBE DE RECIBIR LOS DATOS DE TODOS LOS PROCESOS
           MPI_Reduce(&mypi, &pi, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
@@ -181,14 +201,14 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
             printf("Resultado de multipicar la Matriz por un Vector: %d\n",Q[i]);
 		}
 		
-		printf("Matriz B:\n",Q[i]);
+		printf("Matriz B:\n");
 		
-		int total = n*n;
+	
 		for(int i = 0; i < total; ++i)
 		{
             printf("%d", B[i]);
             
-            if(i%(n-1) == 0)
+            if(i%(n-1) == 0) // sino funciona intercambiar i por n
             {
                 printf("\n");                
             }
