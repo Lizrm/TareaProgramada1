@@ -152,7 +152,7 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
                 
                 auxQ[columna] += evaluado*bufferVector[columna];
                 
-                auxB[posicion] = evaluado + bufferFilas[i,j+1] + bufferFilas[i+1,j];
+                auxB[posicion] = evaluado + bufferFilas[posicion+1] + bufferFilas[posicion+n];
              }
         break;
                     
@@ -172,7 +172,7 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
                 
                 auxQ[columna] += evaluado*bufferVector[columna];
                 
-                auxB[posicion] = evaluado + bufferFilas[i,j -1] + bufferFilas[i -1,j];
+                auxB[posicion] = evaluado + bufferFilas[posicion-1] + bufferFilas[posicion-n];
             }
         break;
         
@@ -189,7 +189,7 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
                 
                 auxQ[columna] += evaluado*bufferVector[columna];
                 
-                auxB[posicion] = evaluado + bufferFilas[i,j -1] + bufferFilas[i -1,j] + bufferFilas[i,j+1] + bufferFilas[i+1,j];
+                auxB[posicion] = evaluado + bufferFilas[posicion-1] + bufferFilas[posicion-n] + bufferFilas[posicion+1] + bufferFilas[posicion+n];
                 
             }
     }
