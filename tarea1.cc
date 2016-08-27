@@ -1,5 +1,5 @@
 //Tarea Programada 1
-//#include "mpi.h"
+#include "mpi.h"
 #include <stdio.h>
 #include <math.h>
 
@@ -21,7 +21,16 @@ int main(int argc,char **argv)
     int *bufferFilas, *bufferVector;   //bufer para recibir los elementos que le corresponden a cada proceso
     int filasCero, filas;   //filasCero: elementos que el tocan a cero  al proceso n-1. //filas: elementos que le tocan a los demas procesos
     int total;  //Para guardar la multiplicacion de n*n
-    int evaluado, posicion;
+    
+    
+    //vectores para Scatterv 
+    int *enteros;  /* nuevo para Scatterv  para 10 procesos */
+    int *direccion;      /* nuevo para Scatterv*/
+    int *auxP;
+    int *auxQ;
+    int *auxB;
+    
+    
     
     /* startwtime hora inicial endwtime hora final*/
     double startwtime, endwtime;
@@ -65,19 +74,26 @@ int main(int argc,char **argv)
 	    V = new int[n];
 	    P = new int[n];
 	    Q = new int[n];
+	    bufferVector = new int[n];
 	    
+	    enteros = new int[numprocs];
+	    direccion = new int[numprocs];
+	    
+	    auxP = new int[n];
+	    auxQ = new int[n];
+	    auxB = new int[n];
 	    /*Acá se realizan todas las tareas que le corresponden al proceso raíz*/
          /*Generacion aleatoria de los elementos de la matriz M y vector V*/
          for(int i=0; i<n; i++)
          {
-            V[i]=rand() % 10;
+            V[i] = 1;//rand() % 10;
             P[i] = 0;           // inicializacon del vector de primos en 0
             Q[i] = 0; 
          }
      
         for(int i=0; i<total; ++i)
         {
-             M[i]=rand() % 10;
+             M[i] = 2;  //rand() % 10;
         }
         
         
@@ -87,14 +103,24 @@ int main(int argc,char **argv)
         
         filasCero  = total/numprocs;
         filas  = filasCero + (2*n);
-        bufer = new int [filas];
+        bufferFilas = new int [filas];
+        
+        enteros[0] = filasCero;
+        enteros[n-1] = filasCero;
+        
+        direccion[0] = 0;
+        direccion[n-1] = n-FilasCero;
+     
+        
+        for(int i = 1; i; i < n-2; ++1)
+        {
+            enteros[i] = filas;
+            direccion[i] = (filasCero*i);
+        }
         
     }
     
-    
-    
-    
-    
+     MPI_Scatterv(M, enteros, direccion, MPI_INT, bufferFilas, total, MPI_INT, 0, MPI_COMM_WORLD); //sino funciona cambiar el total por n y el cero por algo mas
 
         //ACÁ SE DEBE DE HACER LA REPARTICION DE LOS DATOS
         MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -108,9 +134,7 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
     
     //Multiplicacion de Matriz por vector
 
-    int columna;
-        
-        
+    int columna, evaluado, posicion;
          
      switch(myid)   
      {
@@ -123,12 +147,12 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
                   
                 if(evaluado == 2 || evaluado == 3|| evaluado == 5 || evaluado == 7)
                 {    
-                     p[columna]++; 
+                     auxP[columna]++; 
                 }
                 
-                Q[columna] += evaluado*V[columna];
+                auxQ[columna] += evaluado*bufferVector[columna];
                 
-                B[posicion] = evaluado + M[i,j+1] + M[i+1,j];
+                auxB[posicion] = evaluado + bufferFilas[i,j+1] + bufferFilas[i+1,j];
              }
         break;
                     
@@ -136,19 +160,19 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
         
         case n-1: //quien tenga la ultima fila
         
-            for(posicion = n; posicion < filasCero; ++posicion)
+            for(posicion = 0; posicion < filasCero; ++posicion)
             {
                 evaluado  = bufferFilas[posicion];
                 columna = posicion %n;
                   
                 if(evaluado == 2 || evaluado == 3|| evaluado == 5 || evaluado == 7)
                 {    
-                     p[columna]++; 
+                    auxP[columna]++; 
                 }
                 
-                Q[columna] += evaluado*V[columna];
+                auxQ[columna] += evaluado*bufferVector[columna];
                 
-                B[posicion] = evaluado + M[i,j -1] + M[i -1,j];
+                auxB[posicion] = evaluado + bufferFilas[i,j -1] + bufferFilas[i -1,j];
             }
         break;
         
@@ -160,12 +184,12 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
                   
                 if(evaluado == 2 || evaluado == 3|| evaluado == 5 || evaluado == 7)
                 {    
-                     p[columna]++; 
+                    auxP[columna]++; 
                 }
                 
-                Q[columna] += evaluado*V[columna];
+                auxQ[columna] += evaluado*bufferVector[columna];
                 
-                B[posicion] = evaluado + M[i,j -1] + M[i -1,j] + M[i,j+1] + M[i+1,j];
+                auxB[posicion] = evaluado + bufferFilas[i,j -1] + bufferFilas[i -1,j] + bufferFilas[i,j+1] + bufferFilas[i+1,j];
                 
             }
     }
