@@ -196,15 +196,11 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
           
        
  
-  
-        //ACA SE DEBE DE RECIBIR LOS DATOS DE TODOS LOS PROCESOS
-          MPI_Reduce(&mypi, &pi, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-/* Esta rutina funciona así:
--para todos los procesos es el envío de su resultado final (mypi)
--para el proceso raíz (además de servír como el envío de su resultado final también) es un espere a que: 
-    . todos los procesos envíen su resultado final, 
-    . a que con ellos el MPI haga una suma (porque se especificó la función MPI_SUM) 
-    . y a que le almacene esta suma en la variable pi   */ 
+//creo que esto funcionaria asi? o por ser punteros debo quitarles el &  ????
+
+    MPI_Reduce(&auxQ, &Q, n, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(&auxP, &P, n, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(&auxB, &B, total, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
 
     if (myid == 0) /* lo que sigue entre llaves solo lo hace el proceso 0 */
@@ -231,7 +227,7 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
 		for(int i = 0; i < total; ++i)
 		{
             printf("%d", B[i]);
-            
+           
             if(i%(n-1) == 0) // sino funciona intercambiar i por n
             {
                 printf("\n");                
