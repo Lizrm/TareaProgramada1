@@ -7,6 +7,11 @@
 
 int main(int argc,char **argv)
 {
+    double startwtime, endwtime;
+    double startwtimet, endwtimet;
+    
+     startwtimet = MPI_Wtime(); //Toma del tiempo inicial para saber cuanto se tarda en total
+     
     /* n -> cantidad de procesos 
        myid -> identificador de cada proceso
        numorocs -> cantidad de procesos
@@ -122,12 +127,8 @@ int main(int argc,char **argv)
     
      MPI_Scatterv(M, enteros, direccion, MPI_INT, bufferFilas, total, MPI_INT, 0, MPI_COMM_WORLD); //sino funciona cambiar el total por n y el cero por algo mas
 
-        //ACÁ SE DEBE DE HACER LA REPARTICION DE LOS DATOS
-        MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
-/* Esta rutina funciona para el proceso raíz (en este caso el proceso 0) realmente como un broadcast, es decir le envía a 
-TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) funciona como un me espero a recibir n */  
-
-//****     LO QUE LE CORRESPONDE A CADA PROCESO***//
+        
+//****LO QUE LE CORRESPONDE A CADA PROCESO***//
 
 
 // Calcular primos, ya que son numeros entre 0-9, serian los numeros: 2-3-5-7
@@ -206,9 +207,8 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
     if (myid == 0) /* lo que sigue entre llaves solo lo hace el proceso 0 */
     {
         
-        endwtime = MPI_Wtime(); /* Se toma el tiempo actual, para luego calcular la duración del cálculo por 
-		                        diferencia con el tiempo inicial*/
-		printf("Tiempo = %f\n", endwtime-startwtime);
+        printf("Tiempo = %f\n", endwtime-startwtime);
+       
 		for(int i = 0; i < n; ++i)
 		{
             printf("Primos de la fila %d: %d\n",i,P[i]);
@@ -235,7 +235,8 @@ TODOS los n procesos. Para los demás procesos (incluyendo el proceso raíz) fun
            
          }
         
-		
+		endwtimet = MPI_Wtime(); /* Se toma el tiempo actual, para luego calcular la duración del tiempo total*/
+		printf("Tiempo = %f\n", endwtimet-startwtimet);
 		printf("Adriana Mora Calvo B24385\n Lisbeth Rojas Montero B15745");
 		fflush( stdout );
 	}
